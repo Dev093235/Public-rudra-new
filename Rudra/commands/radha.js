@@ -8,6 +8,7 @@
 // - Savage Mode
 // - Voice Mode
 // - Mode Memory
+// - Human Delay / Typing Simulation (FB safer)
 // - Zero old feature removed
 
 const axios = require("axios");
@@ -18,7 +19,7 @@ const googleTTS = require("google-tts-api");
 
 module.exports.config = {
     name: "radha",
-    version: "ABSOLUTE-FINAL-VOICE-UPGRADED-MULTIMODE",
+    version: "ABSOLUTE-FINAL-VOICE-UPGRADED-MULTIMODE-FBSAFE",
     hasPermssion: 0,
     credits: "Rudra + ChatGPT Fix Ultimate",
     description: "Radha AI Perfect Ultimate System",
@@ -117,6 +118,34 @@ function cleanText(text) {
     .replace(/savage mode/gi, "")
     .replace(/voice mode/gi, "")
     .trim();
+}
+
+// ---------- HUMAN DELAY / FB SAFE ----------
+async function smartDelay(text) {
+  const delay =
+    text.length < 10
+      ? Math.floor(Math.random() * 3000) + 3000
+      : text.length < 40
+      ? Math.floor(Math.random() * 4000) + 5000
+      : Math.floor(Math.random() * 5000) + 8000;
+
+  return new Promise(resolve => setTimeout(resolve, delay));
+}
+
+async function humanTyping(api, threadID, text) {
+  try {
+    if (api.sendTypingIndicator) {
+      api.sendTypingIndicator(threadID, true);
+    }
+  } catch (e) {}
+
+  await smartDelay(text);
+
+  try {
+    if (api.sendTypingIndicator) {
+      api.sendTypingIndicator(threadID, false);
+    }
+  } catch (e) {}
 }
 
 // ---------- REMOVE EMOJI ----------
@@ -231,7 +260,6 @@ module.exports.run = async function({ api, event, args }) {
 
   const user = getUser(senderID);
 
-  // ---------- VOICE ----------
   if (body.toLowerCase().includes("voice on")) {
     setUser(senderID, { voice: true });
     return api.sendMessage("Voice ON 😏🎤", threadID, messageID);
@@ -242,14 +270,12 @@ module.exports.run = async function({ api, event, args }) {
     return api.sendMessage("Voice OFF 😌", threadID, messageID);
   }
 
-  // ---------- MODE ----------
   const newMode = detectMode(body);
   if (newMode) {
     setUser(senderID, { mode: newMode });
     return api.sendMessage(`${newMode.toUpperCase()} mode activated 😏`, threadID, messageID);
   }
 
-  // ---------- GENDER ----------
   if (!user.gender) {
     return api.sendMessage("Tum ladka ho ya ladki? 😏", threadID, (err, info) => {
       global.client.handleReply.push({
@@ -262,8 +288,8 @@ module.exports.run = async function({ api, event, args }) {
   }
 
   const reply = await getReply(senderID, prompt);
+  await humanTyping(api, threadID, prompt);
 
-  // ---------- VOICE SEND ----------
   if (user.voice) {
     const file = path.join(BASE_DIR, `${Date.now()}.mp3`);
 
@@ -286,7 +312,6 @@ module.exports.run = async function({ api, event, args }) {
     }, messageID);
   }
 
-  // ---------- TEXT SEND ----------
   return api.sendMessage(reply, threadID, (err, info) => {
     global.client.handleReply.push({
       name: module.exports.config.name,
@@ -303,7 +328,6 @@ module.exports.handleReply = async function({ api, event, handleReply }) {
   if (senderID == api.getCurrentUserID()) return;
   if (senderID !== handleReply.author) return;
 
-  // ---------- GENDER ----------
   if (handleReply.askGender) {
     const text = body.toLowerCase();
 
@@ -320,7 +344,6 @@ module.exports.handleReply = async function({ api, event, handleReply }) {
     }, messageID);
   }
 
-  // ---------- MODE ----------
   const newMode = detectMode(body);
   if (newMode) {
     setUser(senderID, { mode: newMode });
@@ -331,8 +354,8 @@ module.exports.handleReply = async function({ api, event, handleReply }) {
   let clean = cleanText(body);
 
   const reply = await getReply(senderID, clean);
+  await humanTyping(api, threadID, clean);
 
-  // ---------- VOICE ----------
   if (user.voice) {
     const file = path.join(BASE_DIR, `${Date.now()}.mp3`);
 
@@ -355,7 +378,6 @@ module.exports.handleReply = async function({ api, event, handleReply }) {
     }, messageID);
   }
 
-  // ---------- TEXT ----------
   return api.sendMessage(reply, threadID, (err, info) => {
     global.client.handleReply.push({
       name: module.exports.config.name,
