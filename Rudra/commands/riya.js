@@ -8,7 +8,7 @@ const https = require("https");
 const googleTTS = require("google-tts-api");
 
 module.exports.config = {
-    name: "radha",
+    name: "riya",
     version: "ABSOLUTE-FINAL-VOICE-UPGRADED-MULTIMODE-FBSAFE",
     hasPermssion: 0,
     credits: "Rudra + ChatGPT Fix Ultimate",
