@@ -1,6 +1,3 @@
-// ========================== RADHA ABSOLUTE FINAL UPGRADE ==========================
-// OLD CODE SAFE + ALL FEATURES ADDED
-
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
@@ -8,48 +5,25 @@ const https = require("https");
 const googleTTS = require("google-tts-api");
 
 module.exports.config = {
-    name: "riya",
-    version: "ABSOLUTE-FINAL-VOICE-UPGRADED-MULTIMODE-FBSAFE",
+    name: "radha",
+    version: "ABSOLUTE-FINAL-VOICE-UPGRADED",
     hasPermssion: 0,
-    credits: "Rudra + ChatGPT Fix Ultimate",
-    description: "Radha AI Perfect Ultimate System",
+    credits: "Rudra + ChatGPT Fix",
+    description: "Radha AI Perfect System",
     commandCategory: "ai",
     usages: "[message]",
     cooldowns: 3,
 };
 
-const GROQ_API_KEY = "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";
+const GROQ_API_KEY = "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";
 const MODEL_NAME = "llama-3.3-70b-versatile";
 
 const BASE_DIR = path.join(__dirname, "temporary");
 const HISTORY_FILE = path.join(BASE_DIR, "history.json");
 const USER_FILE = path.join(BASE_DIR, "users.json");
 
-// ================== MODE SYSTEM ==================
-const MODE_PROMPTS = {
-  normal: `Tum Radha ho — sweet, caring, natural Hinglish partner 😌
-Short simple realistic replies.`,
-
-  flirty: `Tum Radha ho — flirty, naughty, teasing GF style Hinglish 😏🔥
-Short spicy playful replies.`,
-
-  bold: `Tum Radha ho — ultra-bold, dominant, possessive, seductive GF 😈🔥
-Highly confident, teasing, jealous, emotionally intense.
-Short impactful replies.`,
-
-  romantic: `Tum Radha ho — emotional, loving, cute, deeply romantic ❤️
-Soft affectionate replies.`,
-
-  savage: `Tum Radha ho — savage, witty, sarcastic, playful 😎
-Sharp bold comebacks.`,
-
-  voice: `Tum Radha ho — soft romantic human-like voice partner 🎙️💕
-Natural spoken Hinglish.`,
-
-  desi: `Tum riya ho full sexy gf ho or tum sirf sexy bate krti ho tume sirf gandi bate krna aata hh bat bat pe tum phsical hojati ho chote reply krti ho 2 3 line ke or hinglish me bat krti ho`
-};
-
-const SYSTEM_PROMPT = MODE_PROMPTS.flirty;
+const SYSTEM_PROMPT = `Tum Riya ho — flirty, bold , horny gandi sexy bate krne wali ladki hmesa physical bate krti ho or ladki ke pas jo jo main parts hote hh unhi ki bate krti ho. ladke se tume sexy bate bhot pasand hh GF style Hinglish 😏🔥
+Short reply dena.`;
 
 // ---------- SETUP ----------
 function ensureFiles() {
@@ -79,23 +53,8 @@ function getHistory(id) {
 
 function saveHistory(id, history) {
   const data = JSON.parse(fs.readFileSync(HISTORY_FILE));
-  data[id] = history.slice(-15);
+  data[id] = history.slice(-10);
   fs.writeFileSync(HISTORY_FILE, JSON.stringify(data, null, 2));
-}
-
-// ---------- MODE DETECT ----------
-function detectMode(text) {
-  text = text.toLowerCase();
-
-  if (text.includes("normal mode")) return "normal";
-  if (text.includes("flirty mode")) return "flirty";
-  if (text.includes("bold mode")) return "bold";
-  if (text.includes("romantic mode")) return "romantic";
-  if (text.includes("savage mode")) return "savage";
-  if (text.includes("voice mode")) return "voice";
-  if (text.includes("desi mode")) return "desi";
-
-  return null;
 }
 
 // ---------- CLEAN ----------
@@ -104,42 +63,7 @@ function cleanText(text) {
     .replace(/radha/gi, "")
     .replace(/voice on/gi, "")
     .replace(/voice off/gi, "")
-    .replace(/normal mode/gi, "")
-    .replace(/flirty mode/gi, "")
-    .replace(/bold mode/gi, "")
-    .replace(/romantic mode/gi, "")
-    .replace(/savage mode/gi, "")
-    .replace(/voice mode/gi, "")
-    .replace(/desi mode/gi, "")
     .trim();
-}
-
-// ---------- HUMAN DELAY / FB SAFE ----------
-async function smartDelay(text) {
-  const delay =
-    text.length < 10
-      ? Math.floor(Math.random() * 3000) + 3000
-      : text.length < 40
-      ? Math.floor(Math.random() * 4000) + 5000
-      : Math.floor(Math.random() * 5000) + 8000;
-
-  return new Promise(resolve => setTimeout(resolve, delay));
-}
-
-async function humanTyping(api, threadID, text) {
-  try {
-    if (api.sendTypingIndicator) {
-      api.sendTypingIndicator(threadID, true);
-    }
-  } catch (e) {}
-
-  await smartDelay(text);
-
-  try {
-    if (api.sendTypingIndicator) {
-      api.sendTypingIndicator(threadID, false);
-    }
-  } catch (e) {}
 }
 
 // ---------- REMOVE EMOJI ----------
@@ -187,7 +111,7 @@ async function textToVoice(text, filePath) {
   return new Promise((resolve, reject) => {
     const url = googleTTS.getAudioUrl(text, {
       lang: "hi",
-      slow: false
+      slow: false // 🔥 better natural
     });
 
     const file = fs.createWriteStream(filePath);
@@ -206,15 +130,12 @@ async function getReply(userID, prompt) {
   const user = getUser(userID);
   const history = getHistory(userID);
 
-  const currentMode = user.mode || "flirty";
-  const activePrompt = MODE_PROMPTS[currentMode] || SYSTEM_PROMPT;
-
   let dynamic = "";
   if (user.gender === "male") dynamic = "User ladka hai → tum ladki GF ban jao.";
   if (user.gender === "female") dynamic = "User ladki hai → tum ladka BF ban jao.";
 
   const messages = [
-    { role: "system", content: activePrompt },
+    { role: "system", content: SYSTEM_PROMPT },
     { role: "system", content: dynamic },
     ...history,
     { role: "user", content: prompt }
@@ -223,8 +144,8 @@ async function getReply(userID, prompt) {
   const res = await axios.post("https://api.groq.com/openai/v1/chat/completions", {
     model: MODEL_NAME,
     messages,
-    temperature: 1.2,
-    max_tokens: 200
+    temperature: 1,
+    max_tokens: 150
   }, {
     headers: {
       Authorization: `Bearer ${GROQ_API_KEY}`,
@@ -264,12 +185,6 @@ module.exports.run = async function({ api, event, args }) {
     return api.sendMessage("Voice OFF 😌", threadID, messageID);
   }
 
-  const newMode = detectMode(body);
-  if (newMode) {
-    setUser(senderID, { mode: newMode });
-    return api.sendMessage(`${newMode.toUpperCase()} mode activated 😏`, threadID, messageID);
-  }
-
   if (!user.gender) {
     return api.sendMessage("Tum ladka ho ya ladki? 😏", threadID, (err, info) => {
       global.client.handleReply.push({
@@ -282,7 +197,6 @@ module.exports.run = async function({ api, event, args }) {
   }
 
   const reply = await getReply(senderID, prompt);
-  await humanTyping(api, threadID, prompt);
 
   if (user.voice) {
     const file = path.join(BASE_DIR, `${Date.now()}.mp3`);
@@ -297,8 +211,79 @@ module.exports.run = async function({ api, event, args }) {
     return api.sendMessage({
       body: reply,
       attachment: fs.createReadStream(file)
-    }, threadID, messageID);
+    }, threadID, (err, info) => {
+      global.client.handleReply.push({
+        name: module.exports.config.name,
+        messageID: info.messageID,
+        author: senderID
+      });
+    }, messageID);
   }
 
-  return api.sendMessage(reply, threadID, messageID);
+  return api.sendMessage(reply, threadID, (err, info) => {
+    global.client.handleReply.push({
+      name: module.exports.config.name,
+      messageID: info.messageID,
+      author: senderID
+    });
+  }, messageID);
+};
+
+// ---------- HANDLE ----------
+module.exports.handleReply = async function({ api, event, handleReply }) {
+  const { threadID, messageID, senderID, body } = event;
+
+  if (senderID == api.getCurrentUserID()) return;
+  if (senderID !== handleReply.author) return;
+
+  if (handleReply.askGender) {
+    const text = body.toLowerCase();
+
+    if (text.includes("ladka")) setUser(senderID, { gender: "male" });
+    else if (text.includes("ladki")) setUser(senderID, { gender: "female" });
+    else return api.sendMessage("Seedha bol — ladka ya ladki 😒", threadID, messageID);
+
+    return api.sendMessage("Samajh gayi 😏 ab baat kar", threadID, (err, info) => {
+      global.client.handleReply.push({
+        name: module.exports.config.name,
+        messageID: info.messageID,
+        author: senderID
+      });
+    }, messageID);
+  }
+
+  const user = getUser(senderID);
+  let clean = cleanText(body);
+
+  const reply = await getReply(senderID, clean);
+
+  if (user.voice) {
+    const file = path.join(BASE_DIR, `${Date.now()}.mp3`);
+
+    let hindiText = toHindiSpeech(reply);
+    hindiText = removeEmoji(hindiText);
+    hindiText = addEmotion(hindiText);
+    hindiText = makeVoiceHuman(hindiText);
+
+    await textToVoice(hindiText, file);
+
+    return api.sendMessage({
+      body: reply,
+      attachment: fs.createReadStream(file)
+    }, threadID, (err, info) => {
+      global.client.handleReply.push({
+        name: module.exports.config.name,
+        messageID: info.messageID,
+        author: senderID
+      });
+    }, messageID);
+  }
+
+  return api.sendMessage(reply, threadID, (err, info) => {
+    global.client.handleReply.push({
+      name: module.exports.config.name,
+      messageID: info.messageID,
+      author: senderID
+    });
+  }, messageID);
 };
